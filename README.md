@@ -9,23 +9,27 @@ A modular Discord security bot designed for global blacklist enforcement, local 
 - **Local SQLite Backend**: Zero external cloud database dependencies.
 
 
+## Setup
+### 1. Set up a virtual environment and install dependencies:
 
-## Set up a virtual environment and install dependencies:
-
-Bash
+```
 python -m venv venv
 source venv/bin/activate  # On Windows: venv\Scripts\activate
 pip install .
-Configure your environment variables:
+```
+
+### 2. Configure your environment variables:
 Copy .env.example to .env and insert your Discord Bot Token:
 
-Code snippet
+```
 DISCORD_TOKEN=your_actual_bot_token_here
-Run the bot:
+```
 
-Bash
+### 3. Run the bot:
+
+```
 python gatekeeper.py
-
+```
 ---
 
 ### Step 4: Commit and push package files to GitHub
