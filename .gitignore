@@ -5,6 +5,23 @@ __pycache__/
 
 # C extensions
 *.so
+# Environment variables & secrets
+.env
+
+# Local SQLite Database files
+*.db
+*.sqlite
+*.sqlite3
+
+# Python bytecode and caches
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environments
+venv/
+.venv/
+env/
 
 # Distribution / packaging
 .Python

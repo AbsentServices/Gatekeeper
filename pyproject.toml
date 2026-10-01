@@ -1,0 +1,32 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "discord-gatekeeper-bot"
+version = "1.0.0"
+description = "A Discord moderation bot for network-wide blacklisting and guild whitelisting using local SQLite."
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+authors = [
+    { name = "AbsentPlays", email = "absentplays@gmail.com" }
+]
+keywords = ["discord", "discord-bot", "moderation", "sqlite", "blacklist"]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Operating System :: OS Independent",
+]
+
+dependencies = [
+    "discord.py>=2.3.0",
+    "python-dotenv>=1.0.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/AbsentServices/Gatekeeper"
+Repository = "https://github.com/AbsentServices/Gatekeeper.git"
+Issues = "https://github.com/AbsentServices/Gatekeeper/issues"
+
+[tool.setuptools.packages.find]
+where = ["."]
