@@ -1,5 +1,7 @@
 # Gatekeeper Bot
 
+![Banner](images/GK-Github.png)
+
 A modular Discord security bot designed for global blacklist enforcement, local guild whitelisting, and logging using a local SQLite database.
 
 ## Features
