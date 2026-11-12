@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gatekeeper | Security Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #0b0f19; color: #f3f4f6; }
+        .glass-card { background: rgba(17, 24, 39, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.08); }
+        .glow-red { box-shadow: 0 0 25px rgba(239, 68, 68, 0.15); }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col">
+
+    <!-- Navbar -->
+    <header class="glass-card border-b border-gray-800 sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-xl bg-red-600/20 border border-red-500/30 flex items-center justify-center text-red-400 font-bold text-xl">🛡️</div>
+                <div>
+                    <h1 class="font-bold text-lg tracking-wide text-white">GATEKEEPER</h1>
+                    <p class="text-xs text-gray-400">Network Security & Blacklist Panel</p>
+                </div>
+            </div>
+            <div class="flex items-center space-x-3">
+                <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                    <span class="w-2 h-2 mr-2 rounded-full bg-emerald-400 animate-pulse"></span> Live Sync Active
+                </span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="flex-1 max-w-7xl w-full mx-auto px-6 py-8 space-y-8">
+        
+        <!-- Stats Overview -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div class="glass-card p-6 rounded-2xl glow-red">
+                <p class="text-sm font-medium text-gray-400">Total Blacklisted Users</p>
+                <h3 id="total-count" class="text-3xl font-bold text-white mt-2">--</h3>
+            </div>
+            <div class="glass-card p-6 rounded-2xl">
+                <p class="text-sm font-medium text-gray-400">Active Security Policy</p>
+                <h3 class="text-xl font-semibold text-emerald-400 mt-2">Global Auto-Kick Enabled</h3>
+            </div>
+            <div class="glass-card p-6 rounded-2xl flex items-center justify-between">
+                <div>
+                    <p class="text-sm font-medium text-gray-400">Quick Actions</p>
+                    <p class="text-xs text-gray-500 mt-1">Export records or refresh state</p>
+                </div>
+                <button onclick="fetchBlacklist()" class="px-4 py-2 bg-gray-800 hover:bg-gray-700 text-white text-sm font-medium rounded-xl border border-gray-700 transition">Refresh Data</button>
+            </div>
+        </div>
+
+        <!-- Blacklist Section -->
+        <div class="glass-card rounded-2xl overflow-hidden shadow-2xl">
+            <div class="p-6 border-b border-gray-800 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                <div>
+                    <h2 class="text-xl font-bold text-white">Global Blacklist Directory</h2>
+                    <p class="text-sm text-gray-400 mt-1">Review users restricted across network nodes.</p>
+                </div>
+                <div class="flex items-center space-x-3">
+                    <input type="text" id="search-input" onkeyup="filterTable()" placeholder="Search User ID or Reason..." 
+                        class="px-4 py-2 bg-gray-900 border border-gray-700 rounded-xl text-sm text-white focus:outline-none focus:border-red-500 w-64">
+                </div>
+            </div>
+
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="border-b border-gray-800 bg-gray-900/50 text-gray-400 text-xs uppercase tracking-wider">
+                            <th class="py-4 px-6">User ID</th>
+                            <th class="py-4 px-6">Blacklist Reason</th>
+                            <th class="py-4 px-6">Added By (Admin ID)</th>
+                            <th class="py-4 px-6">Timestamp</th>
+                            <th class="py-4 px-6 text-right">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="blacklist-table-body" class="divide-y divide-gray-800 text-sm">
+                        <tr>
+                            <td colspan="5" class="py-8 text-center text-gray-500">Loading blacklist records...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="glass-card border-t border-gray-800 py-4 text-center text-xs text-gray-500">
+        Gatekeeper Bot Security Panel &copy; 2026 • Powered by SQLite & FastAPI
+    </footer>
+
+    <script>
+        let blacklistData = [];
+
+        async function fetchBlacklist() {
+            try {
+                const response = await fetch('/api/blacklist');
+                const result = await response.json();
+                if (result.success) {
+                    blacklistData = result.data;
+                    document.getElementById('total-count').innerText = blacklistData.length;
+                    renderTable(blacklistData);
+                }
+            } catch (err) {
+                console.error("Failed to load blacklist:", err);
+                document.getElementById('blacklist-table-body').innerHTML = `<tr><td colspan="5" class="py-8 text-center text-red-400">Failed to connect to backend server.</td></tr>`;
+            }
+        }
+
+        function renderTable(data) {
+            const tbody = document.getElementById('blacklist-table-body');
+            if (data.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" class="py-8 text-center text-gray-500">No blacklisted users found.</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = data.map(item => `
+                <tr class="hover:bg-gray-800/40 transition">
+                    <td class="py-4 px-6 font-mono text-red-400">${item.user_id}</td>
+                    <td class="py-4 px-6 text-gray-200">${escapeHtml(item.reason)}</td>
+                    <td class="py-4 px-6 text-gray-400 font-mono">${item.added_by || 'System / Unknown'}</td>
+                    <td class="py-4 px-6 text-gray-400">${formatDate(item.added_at)}</td>
+                    <td class="py-4 px-6 text-right">
+                        <button onclick="revokeUser('${item.user_id}')" class="px-3 py-1.5 bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/30 rounded-lg text-xs font-medium transition">Revoke</button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function filterTable() {
+            const query = document.getElementById('search-input').value.toLowerCase();
+            const filtered = blacklistData.filter(item => 
+                String(item.user_id).includes(query) || 
+                item.reason.toLowerCase().includes(query) ||
+                String(item.added_by).includes(query)
+            );
+            renderTable(filtered);
+        }
+
+        async function revokeUser(userId) {
+            if (!confirm(`Are you sure you want to remove user ${userId} from the global blacklist?`)) return;
+            try {
+                const response = await fetch(`/api/blacklist/${userId}`, { method: 'DELETE' });
+                const result = await response.json();
+                if (result.success) {
+                    fetchBlacklist();
+                } else {
+                    alert('Failed to revoke user.');
+                }
+            } catch (err) {
+                alert('Error connecting to server.');
+            }
+        }
+
+        function formatDate(isoString) {
+            if (!isoString) return 'N/A';
+            try {
+                return new Date(isoString).toLocaleString();
+            } catch {
+                return isoString;
+            }
+        }
+
+        function escapeHtml(str) {
+            return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+        }
+
+        // Initial load
+        fetchBlacklist();
+    </script>
+</body>
+</html>
