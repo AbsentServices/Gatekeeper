@@ -37,3 +37,26 @@ async def main():
 
 if __name__ == "__main__":
     asyncio.run(main())
+
+# Add this event listener inside gatekeeper.py alongside your on_ready event
+
+@bot.event
+async def on_command_error(ctx: commands.Context, error: Exception):
+    """Global error handler to catch command failures gracefully."""
+    # Unwrap original errors if wrapped by command invocation
+    error = getattr(error, "original", error)
+
+    if isinstance(error, commands.MissingPermissions):
+        await ctx.send("❌ You do not have the required administrator permissions to run this command.", ephemeral=True)
+    elif isinstance(error, commands.MissingRequiredArgument):
+        await ctx.send(f"❌ Missing required argument: `{error.param.name}`. Check command usage.", ephemeral=True)
+    elif isinstance(error, commands.BadArgument):
+        await ctx.send("❌ Invalid input format provided. Please double-check your arguments.", ephemeral=True)
+    elif isinstance(error, commands.CommandOnCooldown):
+        await ctx.send(f"⏳ Slow down! Try again in `{error.retry_after:.1f}` seconds.", ephemeral=True)
+    elif isinstance(error, commands.CheckFailure):
+        await ctx.send("❌ You are not authorized to execute this command.", ephemeral=True)
+    else:
+        # Log unexpected errors to console for debugging
+        print(f"Ignoring unhandled command error in {ctx.command}: {error}")
+        await ctx.send("❌ An unexpected error occurred. Please try again later.", ephemeral=True)
